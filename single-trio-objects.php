@@ -6,7 +6,7 @@
     <div class="l-object-head clearfix">
         <h3 class="b-object-head-name"><?php the_title(); ?></h3>
         <?php if( has_term('objects_on_sale', 'trio_objects_category') ) :  ?>
-            <a href="<?php the_field('sale_object_link'); ?>" class="b-object-head-site"><?php the_field('sale_object_link'); ?></a>
+            <a href="http://<?php the_field('sale_object_link'); ?>" class="b-object-head-site"><?php the_field('sale_object_link'); ?></a>
         <?php endif; ?>
     </div>
     <div class="l-object-description">
@@ -14,7 +14,7 @@
     </div>
 
 
-
+<?php if( get_field('add_category_gallery_objects')): ?>
 <div class="controls b-object-trade-category">
     <?php
     if( have_rows('object_image_gallery_repeater') ): ?>
@@ -25,45 +25,73 @@
     endif;
     ?>
 </div>
-
-<div class="container l-object-trade__gallery">
+    <?php     endif;     ?>
+<div class="<?php if( get_field('add_category_gallery_objects')): ?>container<?php endif; ?> l-object-trade__gallery">
     <?php
     if( have_rows('object_image_gallery_repeater') ):
         while ( have_rows('object_image_gallery_repeater') ) : the_row();
 
-            ?>
-            <a href="<?php the_sub_field('single_object_image'); ?>" class="mix <?php the_sub_field('object_filter_category'); ?> b-object-trade-img-link" >
-                <img src="<?php the_sub_field('single_object_image'); ?>" />
-            </a>
-            <?php
-        endwhile;
-    else :
-        // no rows found
-    endif;
+            $image = get_sub_field('single_object_image');
+            if( !empty($image) ):
+                // vars
+                $url = $image['url'];
+                $alt = $image['alt'];
+                // thumbnail
+                $size = 'thumbnail';
+                $thumb = $image['sizes'][ $size ];
+                $width = $image['sizes'][ $size . '-width' ];
+                $height = $image['sizes'][ $size . '-height' ];
+                 ?>
+            <span class="mix <?php the_sub_field('object_filter_category'); ?>">
+                <a href="<?php echo $url; ?>" class="b-object-trade-img-link" >
+                    <img src="<?php echo $thumb;  ?>" alt="<?php echo $alt; ?>" width="<?php echo $width; ?>" height="<?php echo $height; ?>" />
+                </a>
+            </span>
+        <?php
+                endif;
+            endwhile;
+        endif;
     ?>
-
+    <script type="text/javascript">
+        jQuery(document).ready(function(){
+        jQuery('.l-object-trade__gallery').magnificPopup({
+            delegate: 'a',
+            type: 'image',
+            midClick: true,
+            preloader: true,
+            removalDelay: 300,
+            mainClass: 'mfp-fade',
+            gallery: {
+                enabled: true,
+                navigateByImgClick: true,
+                tCounter: '%curr% из %total%',
+                preload: [0,1]
+            }
+        });
+        });
+    </script>
 </div>
-
 
     <section class="h-map h-map-obj4sales">
         <?php
-
         $location = get_field('object_pointer');
 
         if( !empty($location) ):
             ?>
             <div class="acf-map">
-                <div class="marker" data-lat="<?php echo $location['lat']; ?>" data-lng="<?php echo $location['lng']; ?>"></div>
+                <div class="marker" data-lat="<?php echo $location['lat']; ?>" data-lng="<?php echo $location['lng']; ?>">
+                    <?php if (get_field('title_address_object')) :  ?>
+                        <p><?php the_field('title_address_object'); ?></p>
+                    <?php else : ?>
+                        <p class="address"><?php echo $location['address']; ?></p>
+                    <?php endif; ?>
+                </div>
             </div>
         <?php endif; ?>
-
-    <div id="map_container"></div>
-    <div id="map"></div>
 </section>
 
 <p class="b-trade-tagline"><?php the_field('slogan_over_footer_objects'); ?></p>
 
 <?php endwhile; endif;?>
-
 
 <?php get_footer(); ?>
